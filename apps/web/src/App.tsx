@@ -2,17 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { apiClient } from "./lib/apiClient";
 import { getCurrentUser } from "./lib/auth";
 import { RecipesPage } from "./features/recipes/RecipesPage";
-import { IngredientsPage } from "./features/ingredients/IngredientsPage";
 import { MappingsPage } from "./features/mappings/MappingsPage";
 import { PantryPage } from "./features/pantry/PantryPage";
 import { ShoppingPage } from "./features/shopping/ShoppingPage";
 import { AgentChatPage } from "./features/agentChat/AgentChatPage";
 
-type Page = "recipes" | "ingredients" | "mappings" | "pantry" | "shopping" | "agent";
+type Page = "recipes" | "mappings" | "pantry" | "shopping" | "agent";
 
 const nav: { key: Page; label: string }[] = [
-  { key: "recipes", label: "Recipes" },
-  { key: "ingredients", label: "Ingredients" },
+  { key: "recipes", label: "Recipes + Ingredients" },
   { key: "mappings", label: "Mappings" },
   { key: "pantry", label: "Pantry" },
   { key: "shopping", label: "Shopping" },
@@ -48,10 +46,25 @@ export default function App() {
 
   const content = useMemo(() => {
     if (page === "recipes") {
-      return <RecipesPage recipes={recipes} onCreate={async (payload) => { await apiClient.createRecipe(payload); await loadAll(); }} />;
-    }
-    if (page === "ingredients") {
-      return <IngredientsPage ingredients={ingredients} onCreate={async (payload) => { await apiClient.createIngredient(payload); await loadAll(); }} />;
+      return (
+        <RecipesPage
+          recipes={recipes}
+          ingredients={ingredients}
+          onCreateIngredient={async (payload) => {
+            const created = await apiClient.createIngredient(payload);
+            await loadAll();
+            return created;
+          }}
+          onCreateRecipe={async (payload) => {
+            await apiClient.createRecipe(payload);
+            await loadAll();
+          }}
+          onImportRecipe={async (text) => {
+            await apiClient.importRecipeFromText({ text });
+            await loadAll();
+          }}
+        />
+      );
     }
     if (page === "mappings") {
       return <MappingsPage mappings={mappings} onCreate={async (payload) => { await apiClient.createMapping(payload); await loadAll(); }} />;
@@ -93,7 +106,7 @@ export default function App() {
       <header className="mb-4 rounded-2xl bg-white p-4 shadow">
         <h1 className="text-xl font-bold">Kroger Recipe Agent</h1>
         <p className="text-xs text-slate-500">Signed in: {userLabel}</p>
-        <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6">
+        <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5">
           {nav.map((item) => (
             <button
               key={item.key}

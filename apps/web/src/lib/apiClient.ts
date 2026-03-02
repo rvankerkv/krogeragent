@@ -26,5 +26,6 @@ export const apiClient = {
   upsertPantry: (payload: any) => request<any>("/pantry", { method: "POST", body: JSON.stringify(payload) }),
   generateShoppingList: (payload: any) => request<any>("/shopping/generate", { method: "POST", body: JSON.stringify(payload) }),
   chatAgent: (payload: any) => request<any>("/agent/chat", { method: "POST", body: JSON.stringify(payload) }),
+  importRecipeFromText: (payload: { text: string }) => request<any>("/agent/import-recipe", { method: "POST", body: JSON.stringify(payload) }),
   addToCart: (payload: any) => request<any>("/kroger/cart/add", { method: "POST", body: JSON.stringify(payload) })
 };

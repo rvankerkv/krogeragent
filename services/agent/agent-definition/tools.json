@@ -35,6 +35,12 @@
       "description": "Add mapped items to Kroger cart",
       "method": "POST",
       "path": "/api/kroger/cart/add"
+    },
+    {
+      "name": "importRecipeFromText",
+      "description": "Parse pasted recipe text and create recipe plus ingredients",
+      "method": "POST",
+      "path": "/api/agent/import-recipe"
     }
   ]
 }

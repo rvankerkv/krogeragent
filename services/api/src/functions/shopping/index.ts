@@ -20,14 +20,22 @@ app.http("shopping-generate", {
       const mappings = await db.list<Mapping>("mappings", user.userId);
       const recipeIds = payload.recipeIds?.length ? payload.recipeIds : recipes.map((r) => r.id);
 
-      const ingredientUsage = recipes.flatMap((recipe) =>
-        recipe.ingredientIds.map((ingredientId) => ({
+      const ingredientUsage = recipes.flatMap((recipe) => {
+        if (recipe.ingredientLines?.length) {
+          return recipe.ingredientLines.map((line) => ({
+            recipeId: recipe.id,
+            ingredientId: line.ingredientId,
+            quantity: Number(line.quantity || 0),
+            unit: line.unit || "item"
+          }));
+        }
+        return recipe.ingredientIds.map((ingredientId) => ({
           recipeId: recipe.id,
           ingredientId,
           quantity: 1,
           unit: "item"
-        }))
-      );
+        }));
+      });
 
       const items = generateShoppingListItems(recipeIds, recipes, ingredientUsage, pantry, mappings);
       const now = new Date().toISOString();

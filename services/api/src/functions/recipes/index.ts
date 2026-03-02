@@ -31,11 +31,26 @@ app.http("recipes-create", {
       const user = requireUser(request);
       const payload = await readJson<Partial<Recipe>>(request);
       const now = new Date().toISOString();
+      const ingredientLines = Array.isArray(payload.ingredientLines)
+        ? payload.ingredientLines
+            .map((line) => ({
+              ingredientId: String(line.ingredientId || "").trim(),
+              quantity: Number(line.quantity ?? 0),
+              unit: String(line.unit || "item").trim()
+            }))
+            .filter((line) => line.ingredientId && line.quantity > 0)
+        : [];
+      const ingredientIds = ingredientLines.length
+        ? [...new Set(ingredientLines.map((line) => line.ingredientId))]
+        : Array.isArray(payload.ingredientIds)
+          ? payload.ingredientIds
+          : [];
       const recipe: Recipe = {
         id: uuidv4(),
         userId: user.userId,
         name: requiredString(payload.name, "name"),
-        ingredientIds: Array.isArray(payload.ingredientIds) ? payload.ingredientIds : [],
+        ingredientIds,
+        ingredientLines,
         instructions: Array.isArray(payload.instructions) ? payload.instructions : [],
         createdAt: now,
         updatedAt: now
@@ -60,9 +75,25 @@ app.http("recipes-update", {
       if (!existing) return json(404, { error: "Recipe not found" });
 
       const payload = await readJson<Partial<Recipe>>(request);
+      const ingredientLines = Array.isArray(payload.ingredientLines)
+        ? payload.ingredientLines
+            .map((line) => ({
+              ingredientId: String(line.ingredientId || "").trim(),
+              quantity: Number(line.quantity ?? 0),
+              unit: String(line.unit || "item").trim()
+            }))
+            .filter((line) => line.ingredientId && line.quantity > 0)
+        : existing.ingredientLines;
+      const ingredientIds = ingredientLines?.length
+        ? [...new Set(ingredientLines.map((line) => line.ingredientId))]
+        : Array.isArray(payload.ingredientIds)
+          ? payload.ingredientIds
+          : existing.ingredientIds;
       const updated: Recipe = {
         ...existing,
         ...payload,
+        ingredientLines,
+        ingredientIds,
         id: existing.id,
         userId: existing.userId,
         updatedAt: new Date().toISOString()

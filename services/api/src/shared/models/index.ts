@@ -8,6 +8,11 @@ export interface BaseEntity {
 export interface Recipe extends BaseEntity {
   name: string;
   ingredientIds: string[];
+  ingredientLines?: Array<{
+    ingredientId: string;
+    quantity: number;
+    unit: string;
+  }>;
   instructions: string[];
 }
 
