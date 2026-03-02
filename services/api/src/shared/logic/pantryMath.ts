@@ -1,4 +1,4 @@
-import { PantryItem } from "../models/index.js";
+import { PantryItem } from "../models/index";
 
 export function subtractPantry(required: { ingredientId: string; quantity: number; unit: string }[], pantry: PantryItem[]) {
   return required.map((r) => {
@@ -10,3 +10,4 @@ export function subtractPantry(required: { ingredientId: string; quantity: numbe
     };
   });
 }
+

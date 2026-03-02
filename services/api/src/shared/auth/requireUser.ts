@@ -37,3 +37,4 @@ export function requireUser(request: HttpRequest): UserContext {
 
   throw new Error("Unauthorized: missing Static Web Apps user context");
 }
+

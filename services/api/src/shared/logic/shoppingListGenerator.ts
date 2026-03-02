@@ -1,6 +1,6 @@
-import { Mapping, PantryItem, Recipe, ShoppingListItem } from "../models/index.js";
-import { resolveMapping } from "./mappingResolution.js";
-import { subtractPantry } from "./pantryMath.js";
+import { Mapping, PantryItem, Recipe, ShoppingListItem } from "../models/index";
+import { resolveMapping } from "./mappingResolution";
+import { subtractPantry } from "./pantryMath";
 
 export type RecipeIngredientUsage = {
   recipeId: string;
@@ -44,3 +44,4 @@ export function generateShoppingListItems(
     };
   });
 }
+

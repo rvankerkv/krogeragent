@@ -1,11 +1,11 @@
 import { app, HttpRequest } from "@azure/functions";
 import { v4 as uuidv4 } from "uuid";
-import { requireUser } from "../../shared/auth/requireUser.js";
-import { db } from "../../shared/db/cosmosClient.js";
-import { Mapping, PantryItem, Recipe, ShoppingList } from "../../shared/models/index.js";
-import { errorResponse, json } from "../../shared/http.js";
-import { readJson } from "../../shared/validation/index.js";
-import { generateShoppingListItems } from "../../shared/logic/shoppingListGenerator.js";
+import { requireUser } from "../../shared/auth/requireUser";
+import { db } from "../../shared/db/cosmosClient";
+import { Mapping, PantryItem, Recipe, ShoppingList } from "../../shared/models/index";
+import { errorResponse, json } from "../../shared/http";
+import { readJson } from "../../shared/validation/index";
+import { generateShoppingListItems } from "../../shared/logic/shoppingListGenerator";
 
 app.http("shopping-generate", {
   methods: ["POST"],
@@ -55,3 +55,4 @@ app.http("shopping-generate", {
     }
   }
 });
+

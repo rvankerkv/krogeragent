@@ -12,3 +12,4 @@ export function errorResponse(error: unknown, defaultStatus = 400): HttpResponse
   const status = message.startsWith("Unauthorized") ? 401 : defaultStatus;
   return json(status, { error: message });
 }
+

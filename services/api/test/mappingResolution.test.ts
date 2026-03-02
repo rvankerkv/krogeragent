@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveMapping } from "../src/shared/logic/mappingResolution.js";
+import { resolveMapping } from "../src/shared/logic/mappingResolution";
 
 describe("mapping resolution", () => {
   it("prefers mapping with upc when multiple mappings exist", () => {
@@ -11,3 +11,4 @@ describe("mapping resolution", () => {
     expect(mapping?.id).toBe("m2");
   });
 });
+

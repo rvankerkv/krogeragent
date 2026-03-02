@@ -1,10 +1,10 @@
 import { app, HttpRequest } from "@azure/functions";
 import { v4 as uuidv4 } from "uuid";
-import { requireUser } from "../../shared/auth/requireUser.js";
-import { db } from "../../shared/db/cosmosClient.js";
-import { Ingredient } from "../../shared/models/index.js";
-import { errorResponse, json } from "../../shared/http.js";
-import { readJson, requiredString } from "../../shared/validation/index.js";
+import { requireUser } from "../../shared/auth/requireUser";
+import { db } from "../../shared/db/cosmosClient";
+import { Ingredient } from "../../shared/models/index";
+import { errorResponse, json } from "../../shared/http";
+import { readJson, requiredString } from "../../shared/validation/index";
 
 app.http("ingredients-list", {
   methods: ["GET"],
@@ -85,3 +85,4 @@ app.http("ingredients-delete", {
     }
   }
 });
+

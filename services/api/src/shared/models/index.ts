@@ -50,3 +50,4 @@ export interface ShoppingList extends BaseEntity {
   recipeIds: string[];
   items: ShoppingListItem[];
 }
+

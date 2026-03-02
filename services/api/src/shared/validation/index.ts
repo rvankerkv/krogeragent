@@ -10,3 +10,4 @@ export function requiredString(value: unknown, field: string): string {
   }
   return value.trim();
 }
+

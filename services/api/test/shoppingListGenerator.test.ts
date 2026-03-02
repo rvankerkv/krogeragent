@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { generateShoppingListItems } from "../src/shared/logic/shoppingListGenerator.js";
+import { generateShoppingListItems } from "../src/shared/logic/shoppingListGenerator";
 
 describe("shopping list generator", () => {
   it("aggregates recipe ingredient usage and subtracts pantry", () => {
@@ -24,3 +24,4 @@ describe("shopping list generator", () => {
     expect(i1?.upc).toBe("12345678");
   });
 });
+

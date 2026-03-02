@@ -1,9 +1,9 @@
 import { app, HttpRequest } from "@azure/functions";
 import { v4 as uuidv4 } from "uuid";
-import { requireUser } from "../../shared/auth/requireUser.js";
-import { db } from "../../shared/db/cosmosClient.js";
-import { errorResponse, json } from "../../shared/http.js";
-import { readJson } from "../../shared/validation/index.js";
+import { requireUser } from "../../shared/auth/requireUser";
+import { db } from "../../shared/db/cosmosClient";
+import { errorResponse, json } from "../../shared/http";
+import { readJson } from "../../shared/validation/index";
 
 const authBase = "https://api.kroger.com/v1/connect/oauth2";
 
@@ -124,3 +124,4 @@ app.http("kroger-cart-add", {
     }
   }
 });
+

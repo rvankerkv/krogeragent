@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { subtractPantry } from "../src/shared/logic/pantryMath.js";
+import { subtractPantry } from "../src/shared/logic/pantryMath";
 
 describe("pantry subtraction", () => {
   it("never returns negative quantities", () => {
@@ -18,3 +18,4 @@ describe("pantry subtraction", () => {
     expect(result[1].quantity).toBe(0.75);
   });
 });
+
