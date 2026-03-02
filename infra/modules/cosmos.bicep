@@ -28,7 +28,8 @@ resource cosmos 'Microsoft.DocumentDB/databaseAccounts@2024-02-15-preview' = {
 }
 
 resource sqlDb 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2024-02-15-preview' = {
-  name: '${cosmos.name}/${databaseName}'
+  parent: cosmos
+  name: databaseName
   properties: {
     resource: {
       id: databaseName
@@ -46,7 +47,8 @@ var containerNames = [
 ]
 
 resource containers 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2024-02-15-preview' = [for c in containerNames: {
-  name: '${cosmos.name}/${sqlDb.name}/${c}'
+  parent: sqlDb
+  name: c
   properties: {
     resource: {
       id: c
