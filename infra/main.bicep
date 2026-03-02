@@ -92,10 +92,6 @@ resource cosmosDataRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRole
     roleDefinitionId: '${cosmosAccountId}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002'
     scope: cosmosAccountId
   }
-  dependsOn: [
-    cosmos
-    functionApp
-  ]
 }
 
 output staticWebAppUrl string = staticWebApp.outputs.defaultHostname

@@ -49,7 +49,7 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
         }
         {
           name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${listKeys(storage.id, storage.apiVersion).keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
         }
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
