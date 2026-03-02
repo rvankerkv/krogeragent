@@ -1,0 +1,13 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "AZURE_COSMOS_ENDPOINT": "",
+    "AZURE_COSMOS_DATABASE_NAME": "kroger",
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": "",
+    "KROGER_CLIENT_ID": "",
+    "KROGER_CLIENT_SECRET": "",
+    "KROGER_REDIRECT_URI": ""
+  }
+}

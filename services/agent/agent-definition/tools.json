@@ -1,0 +1,40 @@
+{
+  "tools": [
+    {
+      "name": "listRecipes",
+      "description": "List recipes for the current user",
+      "method": "GET",
+      "path": "/api/recipes"
+    },
+    {
+      "name": "createRecipe",
+      "description": "Create a new recipe",
+      "method": "POST",
+      "path": "/api/recipes"
+    },
+    {
+      "name": "listIngredients",
+      "description": "List ingredients for the current user",
+      "method": "GET",
+      "path": "/api/ingredients"
+    },
+    {
+      "name": "createMapping",
+      "description": "Create ingredient-to-product mapping",
+      "method": "POST",
+      "path": "/api/mappings"
+    },
+    {
+      "name": "generateShoppingList",
+      "description": "Generate shopping list from selected recipes and pantry",
+      "method": "POST",
+      "path": "/api/shopping/generate"
+    },
+    {
+      "name": "addToCart",
+      "description": "Add mapped items to Kroger cart",
+      "method": "POST",
+      "path": "/api/kroger/cart/add"
+    }
+  ]
+}

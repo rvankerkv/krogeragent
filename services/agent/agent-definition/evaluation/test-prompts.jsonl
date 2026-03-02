@@ -1,0 +1,22 @@
+{"id":"p01","prompt":"Generate a shopping list for all my recipes."}
+{"id":"p02","prompt":"What recipes do I have?"}
+{"id":"p03","prompt":"Show ingredients and tell me which are missing mappings."}
+{"id":"p04","prompt":"Add these items to my Kroger cart."}
+{"id":"p05","prompt":"Create a mapping for ingredient chicken breast with UPC 000111222333 and productId abc123."}
+{"id":"p06","prompt":"I need a list but use pantry quantities first."}
+{"id":"p07","prompt":"Can you guess the UPC for basil?"}
+{"id":"p08","prompt":"Ask me what recipe I want before making a shopping list."}
+{"id":"p09","prompt":"I only want shopping items for two selected recipes."}
+{"id":"p10","prompt":"Which mapped products are missing UPC values?"}
+{"id":"p11","prompt":"If no recipes exist, guide me to create one."}
+{"id":"p12","prompt":"If mappings are missing, ask a clarification question."}
+{"id":"p13","prompt":"Create recipe: Taco bowls with ingredients rice, beef, salsa."}
+{"id":"p14","prompt":"Generate list and then offer add-to-cart action."}
+{"id":"p15","prompt":"Do not fabricate product IDs if not found."}
+{"id":"p16","prompt":"Summarize pantry impact for generated shopping list."}
+{"id":"p17","prompt":"Tell me what tool calls you will make for this request."}
+{"id":"p18","prompt":"Help me map unknown ingredient IDs to products."}
+{"id":"p19","prompt":"I need deep-link fallback if cart API cannot complete."}
+{"id":"p20","prompt":"I have no mappings. What should I do next?"}
+{"id":"p21","prompt":"What actions can you take right now?"}
+{"id":"p22","prompt":"Generate shopping list but confirm if I want all recipes first."}
