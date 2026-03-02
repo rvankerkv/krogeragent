@@ -24,7 +24,11 @@ type Props = {
     ingredientLines: Array<{ ingredientId: string; quantity: number; unit: string }>;
     instructions: string[];
   }) => Promise<void>;
-  onImportRecipe: (text: string) => Promise<void>;
+  onImportRecipe: (text: string) => Promise<{
+    recipeName: string;
+    instructions: string[];
+    ingredientLines: Array<{ quantity: number; unit: string; ingredientName: string; ingredientId: string | null }>;
+  }>;
 };
 
 function emptyLine(): IngredientLineInput {
@@ -168,7 +172,20 @@ export function RecipesPage({ recipes, ingredients, onCreateIngredient, onCreate
           onClick={async () => {
             setBusy(true);
             try {
-              await onImportRecipe(pastedRecipe);
+              const parsed = await onImportRecipe(pastedRecipe);
+              setName(parsed.recipeName || "");
+              setInstructions((parsed.instructions || []).join("\n"));
+              setLines(
+                (parsed.ingredientLines || []).length
+                  ? parsed.ingredientLines.map((line) => ({
+                      id: crypto.randomUUID(),
+                      quantity: String(line.quantity || 1),
+                      unit: line.unit || "item",
+                      ingredientId: line.ingredientId || "",
+                      newIngredientName: line.ingredientId ? "" : line.ingredientName || ""
+                    }))
+                  : [emptyLine()]
+              );
               setPastedRecipe("");
             } finally {
               setBusy(false);

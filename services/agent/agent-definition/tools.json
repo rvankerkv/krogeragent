@@ -38,7 +38,7 @@
     },
     {
       "name": "importRecipeFromText",
-      "description": "Parse pasted recipe text and create recipe plus ingredients",
+      "description": "Parse pasted recipe text into editable recipe and ingredient lines (no persistence)",
       "method": "POST",
       "path": "/api/agent/import-recipe"
     }

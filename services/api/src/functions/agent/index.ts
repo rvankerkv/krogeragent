@@ -1,5 +1,4 @@
 import { app, HttpRequest } from "@azure/functions";
-import { v4 as uuidv4 } from "uuid";
 import { requireUser } from "../../shared/auth/requireUser";
 import { db } from "../../shared/db/cosmosClient";
 import { Ingredient, Mapping, PantryItem, Recipe } from "../../shared/models/index";
@@ -85,19 +84,103 @@ async function runTools(userId: string, message: string): Promise<ToolResult> {
   };
 }
 
+const vulgarFractionMap: Record<string, number> = {
+  "¼": 0.25,
+  "½": 0.5,
+  "¾": 0.75,
+  "⅐": 1 / 7,
+  "⅑": 1 / 9,
+  "⅒": 0.1,
+  "⅓": 1 / 3,
+  "⅔": 2 / 3,
+  "⅕": 0.2,
+  "⅖": 0.4,
+  "⅗": 0.6,
+  "⅘": 0.8,
+  "⅙": 1 / 6,
+  "⅚": 5 / 6,
+  "⅛": 0.125,
+  "⅜": 0.375,
+  "⅝": 0.625,
+  "⅞": 0.875
+};
+
+function parseNumberToken(token: string): number | null {
+  const trimmed = token.trim();
+  if (!trimmed) return null;
+  if (vulgarFractionMap[trimmed] !== undefined) return vulgarFractionMap[trimmed];
+  if (/^\d+\/\d+$/.test(trimmed)) {
+    const [a, b] = trimmed.split("/").map(Number);
+    return b ? a / b : null;
+  }
+  const n = Number(trimmed);
+  return Number.isFinite(n) ? n : null;
+}
+
+function parseQuantityExpression(input: string): number | null {
+  const tokens = input.trim().split(/\s+/);
+  if (!tokens.length) return null;
+  if (tokens.length >= 2) {
+    const first = parseNumberToken(tokens[0]);
+    const second = parseNumberToken(tokens[1]);
+    if (first !== null && second !== null && !tokens[0].includes(".")) {
+      return first + second;
+    }
+  }
+  return parseNumberToken(tokens[0]);
+}
+
+function normalizeUnit(unitRaw: string): string {
+  const unit = unitRaw.toLowerCase().replace(/\./g, "");
+  if (unit === "grams" || unit === "gram") return "g";
+  if (unit === "kilograms" || unit === "kilogram") return "kg";
+  if (unit === "ounces" || unit === "ounce") return "oz";
+  if (unit === "pounds" || unit === "pound") return "lb";
+  if (unit === "tablespoons" || unit === "tablespoon") return "tbsp";
+  if (unit === "teaspoons" || unit === "teaspoon") return "tsp";
+  if (unit === "cups" || unit === "cup") return "cup";
+  return unit;
+}
+
+function isLikelyHeaderLine(line: string): boolean {
+  const lower = line.toLowerCase().trim();
+  if (lower === "ingredients" || lower === "ingredients:" || lower === "instructions" || lower === "instructions:" || lower === "directions" || lower === "directions:") {
+    return true;
+  }
+  if (!lower.endsWith(":")) return false;
+  const stem = lower.slice(0, -1).trim();
+  const words = stem.split(/\s+/).filter(Boolean);
+  if (words.length > 4) return false;
+  return !/\d/.test(stem);
+}
+
 function parseIngredientLine(line: string): { quantity: number; unit: string; name: string } | null {
   const cleaned = line.replace(/^[-*]\s*/, "").trim();
   if (!cleaned) return null;
-  const match = cleaned.match(/^(\d+(?:\.\d+)?(?:\/\d+)?)\s+([a-zA-Z]+)\s+(.+)$/);
-  if (!match) {
+
+  if (isLikelyHeaderLine(cleaned)) return null;
+
+  const gramPriorityMatch = cleaned.match(/^(\d+(?:\.\d+)?)\s*g(?:ram|rams)?\b\s*(?:\([^)]*\))?\s*(.+)$/i);
+  if (gramPriorityMatch) {
+    return {
+      quantity: Number(gramPriorityMatch[1]),
+      unit: "g",
+      name: gramPriorityMatch[2].trim()
+    };
+  }
+
+  const leadingMeasureMatch = cleaned.match(/^(\d+(?:\.\d+)?(?:\s+\d+\/\d+)?|[¼½¾⅓⅔⅛⅜⅝⅞])\s*([a-zA-Z]+)\b\s*(.+)$/);
+  if (!leadingMeasureMatch) {
     return { quantity: 1, unit: "item", name: cleaned };
   }
-  const qtyRaw = match[1];
-  const quantity = qtyRaw.includes("/") ? Number(qtyRaw.split("/")[0]) / Number(qtyRaw.split("/")[1]) : Number(qtyRaw);
+
+  const quantity = parseQuantityExpression(leadingMeasureMatch[1]);
+  const unit = normalizeUnit(leadingMeasureMatch[2]);
+  const name = leadingMeasureMatch[3].trim();
   return {
-    quantity: Number.isFinite(quantity) ? quantity : 1,
-    unit: match[2].toLowerCase(),
-    name: match[3].trim()
+    quantity: quantity && quantity > 0 ? quantity : 1,
+    unit: unit || "item",
+    name: name || cleaned
   };
 }
 
@@ -108,7 +191,8 @@ function parsePastedRecipe(text: string): { name: string; ingredients: Array<{ q
     .filter(Boolean);
   if (!rawLines.length) throw new Error("Recipe text is empty");
 
-  const name = rawLines[0].replace(/^recipe\s*:\s*/i, "").trim();
+  const first = rawLines[0].replace(/^recipe\s*:\s*/i, "").trim();
+  const name = isLikelyHeaderLine(first) ? "" : first;
   const ingredients: Array<{ quantity: number; unit: string; name: string }> = [];
   const instructions: string[] = [];
 
@@ -123,6 +207,8 @@ function parsePastedRecipe(text: string): { name: string; ingredients: Array<{ q
       section = "instructions";
       continue;
     }
+
+    if (isLikelyHeaderLine(line)) continue;
 
     if (section === "ingredients") {
       const parsed = parseIngredientLine(line);
@@ -144,7 +230,7 @@ function parsePastedRecipe(text: string): { name: string; ingredients: Array<{ q
   }
 
   return {
-    name: name || "Imported Recipe",
+    name: name || `Imported Recipe ${new Date().toISOString().slice(0, 10)}`,
     ingredients,
     instructions: instructions.filter(Boolean)
   };
@@ -181,52 +267,23 @@ app.http("agent-import-recipe", {
 
       const parsed = parsePastedRecipe(text);
       const existingIngredients = await db.list<Ingredient>("ingredients", user.userId);
-      const now = new Date().toISOString();
-      const ingredientIds: string[] = [];
-      const createdIngredients: Ingredient[] = [];
+      const ingredientLookup = new Map(existingIngredients.map((i) => [i.name.toLowerCase(), i]));
 
-      for (const item of parsed.ingredients) {
-        const existing = existingIngredients.find((i) => i.name.toLowerCase() === item.name.toLowerCase());
-        if (existing) {
-          ingredientIds.push(existing.id);
-          continue;
-        }
-        const created: Ingredient = {
-          id: uuidv4(),
-          userId: user.userId,
-          name: item.name,
-          defaultUnit: item.unit || "item",
-          createdAt: now,
-          updatedAt: now
+      const preview = parsed.ingredients.map((line) => {
+        const existing = ingredientLookup.get(line.name.toLowerCase());
+        return {
+          quantity: line.quantity,
+          unit: line.unit,
+          ingredientName: line.name,
+          ingredientId: existing?.id || null
         };
-        await db.upsert("ingredients", created);
-        existingIngredients.push(created);
-        createdIngredients.push(created);
-        ingredientIds.push(created.id);
-      }
+      });
 
-      const recipe: Recipe = {
-        id: uuidv4(),
-        userId: user.userId,
-        name: parsed.name,
-        ingredientIds: [...new Set(ingredientIds)],
-        ingredientLines: parsed.ingredients
-          .map((item, idx) => ({
-            ingredientId: ingredientIds[idx],
-            quantity: Number(item.quantity || 1),
-            unit: item.unit || "item"
-          }))
-          .filter((line) => Boolean(line.ingredientId)),
+      return json(200, {
+        message: "Recipe parsed. Review and confirm before saving.",
+        recipeName: parsed.name,
         instructions: parsed.instructions,
-        createdAt: now,
-        updatedAt: now
-      };
-      await db.upsert("recipes", recipe);
-
-      return json(201, {
-        message: "Recipe imported by agent parser.",
-        recipe,
-        createdIngredients
+        ingredientLines: preview
       });
     } catch (e) {
       return errorResponse(e);

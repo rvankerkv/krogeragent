@@ -60,8 +60,7 @@ export default function App() {
             await loadAll();
           }}
           onImportRecipe={async (text) => {
-            await apiClient.importRecipeFromText({ text });
-            await loadAll();
+            return await apiClient.importRecipeFromText({ text });
           }}
         />
       );
