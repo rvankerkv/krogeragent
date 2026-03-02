@@ -26,6 +26,8 @@ var cosmosName = '${namePrefix}-cosmos-${environmentName}'
 var keyVaultName = toLower(substring(replace('${namePrefix}-kv-${environmentName}-${uniqueString(resourceGroup().id)}', '-', ''), 0, 24))
 var functionName = '${namePrefix}-func-${environmentName}'
 var swaName = '${namePrefix}-swa-${environmentName}'
+var cosmosAccountId = resourceId('Microsoft.DocumentDB/databaseAccounts', cosmosName)
+var cosmosRoleAssignmentGuid = guid(cosmosName, functionName, 'cosmos-data-contributor')
 
 module appInsights './modules/appInsights.bicep' = {
   name: 'appInsightsDeploy'
@@ -84,12 +86,16 @@ module staticWebApp './modules/staticWebApp.bicep' = {
 }
 
 resource cosmosDataRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-02-15-preview' = {
-  name: '${cosmos.outputs.name}/${guid(cosmos.outputs.id, functionApp.outputs.principalId, 'cosmos-data-contributor')}'
+  name: '${cosmosName}/${cosmosRoleAssignmentGuid}'
   properties: {
     principalId: functionApp.outputs.principalId
-    roleDefinitionId: '${cosmos.outputs.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002'
-    scope: cosmos.outputs.id
+    roleDefinitionId: '${cosmosAccountId}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002'
+    scope: cosmosAccountId
   }
+  dependsOn: [
+    cosmos
+    functionApp
+  ]
 }
 
 output staticWebAppUrl string = staticWebApp.outputs.defaultHostname
